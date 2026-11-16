@@ -1,0 +1,30 @@
+# Phase 0 pipeline: proves GitLab CI runs on every push.
+# It only checks Terraform formatting and validity (no AWS access needed).
+# Later phases add: test, security scan, build, push to ECR, plan, apply, deploy.
+
+stages:
+  - validate
+
+variables:
+  TF_IN_AUTOMATION: "true"
+
+# Only run for branch pushes and merge requests.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+terraform-validate:
+  stage: validate
+  image:
+    name: hashicorp/terraform:1.17
+    entrypoint: [""]
+  script:
+    - terraform fmt -check -recursive infra/
+    - cd infra/bootstrap
+    - terraform init -backend=false -input=false
+    - terraform validate
+  rules:
+    - changes:
+        - infra/**/*
+        - .gitlab-ci.yml
