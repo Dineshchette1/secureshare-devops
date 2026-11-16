@@ -34,3 +34,8 @@ htmlcov/
 .DS_Store
 .vscode/*
 !.vscode/extensions.json
+
+# Django
+db.sqlite3
+media/
+staticfiles/
