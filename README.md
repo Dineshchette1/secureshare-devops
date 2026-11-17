@@ -24,8 +24,8 @@ docs/               Runbooks, postmortems, logs, compliance map
 ## Phases
 
 - [x] 0. Setup: Codespace, AWS access, state bucket, budget alerts, GitLab CI
-- [ ] 1. Django app, Dockerfile, tests
-- [ ] 2. Terraform foundation: VPC, IAM, security groups, TLS
+- [x] 1. Django app, Dockerfile, tests
+- [x] 2. Terraform foundation: VPC, IAM, security groups, TLS
 - [ ] 3. ECS Fargate, ALB, RDS, ECR, autoscaling
 - [ ] 4. EC2 host: hardening, SSM patching
 - [ ] 5. GitLab CI/CD with OIDC, scans, approvals, deploy
