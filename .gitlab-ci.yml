@@ -47,6 +47,9 @@ django-test:
     DATABASE_URL: "postgres://secureshare:ci-password-not-a-secret@postgres:5432/secureshare"
     DJANGO_DEBUG: "true"
     DJANGO_SECRET_KEY: ci-only-key-not-for-production
+    # Persistent connections are for production; the test runner opens
+    # and closes connections per test, so disable pooling here.
+    DJANGO_CONN_MAX_AGE: "0"
   cache:
     key:
       files:

@@ -107,8 +107,11 @@ class ShareLinkTests(SecureShareTestCase):
 
     def test_download_increments_the_counter(self):
         url = reverse("share_download", args=[self.document.share_token])
-        self.client.get(url).close()
-        self.client.get(url).close()
+        # Drain the streaming body rather than calling response.close():
+        # close() fires request_finished, which closes the database
+        # connection inside the test transaction and breaks later tests.
+        for _ in range(2):
+            b"".join(self.client.get(url).streaming_content)
 
         self.document.refresh_from_db()
         self.assertEqual(self.document.download_count, 2)
