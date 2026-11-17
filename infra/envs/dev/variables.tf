@@ -32,3 +32,9 @@ variable "az_count" {
     error_message = "Use 2 or 3 AZs: the load balancer requires at least 2."
   }
 }
+
+variable "app_port" {
+  description = "Port the application container listens on."
+  type        = number
+  default     = 8000
+}
