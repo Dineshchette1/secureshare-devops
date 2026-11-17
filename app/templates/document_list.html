@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Upload a document</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Upload</button>
+</form>
+
+<h2>Documents</h2>
+{% if documents %}
+<table>
+  <thead>
+    <tr><th>Title</th><th>Size</th><th>Uploaded</th><th>Expires</th><th>Share link</th></tr>
+  </thead>
+  <tbody>
+    {% for doc in documents %}
+    <tr>
+      <td>{{ doc.title }}</td>
+      <td>{{ doc.size_display }}</td>
+      <td class="muted">{{ doc.uploaded_at|date:"M j, Y H:i" }}</td>
+      <td class="{% if doc.is_expired %}expired{% endif %}">
+        {% if doc.is_expired %}expired{% else %}{{ doc.expires_at|date:"M j, Y" }}{% endif %}
+      </td>
+      <td><a href="{% url 'share_download' doc.share_token %}">download</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No documents yet.</p>
+{% endif %}
+{% endblock %}

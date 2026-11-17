@@ -1,12 +1,15 @@
-# Phase 0 pipeline: proves GitLab CI runs on every push.
-# It only checks Terraform formatting and validity (no AWS access needed).
-# Later phases add: test, security scan, build, push to ECR, plan, apply, deploy.
+# Pipeline for SecureShare.
+#   validate: Terraform formatting and syntax
+#   test:     Django test suite against a real PostgreSQL
+# Phase 5 adds: security scanning, image build, plan/apply with manual approval.
 
 stages:
   - validate
+  - test
 
 variables:
   TF_IN_AUTOMATION: "true"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 # Only run for branch pushes and merge requests.
 workflow:
@@ -27,4 +30,35 @@ terraform-validate:
   rules:
     - changes:
         - infra/**/*
+        - .gitlab-ci.yml
+
+django-test:
+  stage: test
+  image: python:3.12-slim
+  # A throwaway PostgreSQL for this job, so tests run on the same engine
+  # as production rather than SQLite.
+  services:
+    - name: postgres:17-alpine
+      alias: postgres
+  variables:
+    POSTGRES_DB: secureshare
+    POSTGRES_USER: secureshare
+    POSTGRES_PASSWORD: ci-password-not-a-secret
+    DATABASE_URL: "postgres://secureshare:ci-password-not-a-secret@postgres:5432/secureshare"
+    DJANGO_DEBUG: "true"
+    DJANGO_SECRET_KEY: ci-only-key-not-for-production
+  cache:
+    key:
+      files:
+        - app/requirements.txt
+    paths:
+      - .cache/pip
+  before_script:
+    - cd app
+    - pip install -r requirements.txt
+  script:
+    - python manage.py test documents -v 2
+  rules:
+    - changes:
+        - app/**/*
         - .gitlab-ci.yml
